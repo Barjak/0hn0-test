@@ -9,12 +9,16 @@
  */
 var Levels = new (function(){
   var self = this,
-      puzzles = { size5: [], size6: [], size7: [], size8: [] },
+      puzzles = { size5: [], size6: [], size7: [], size8: [], size20: [] , size50: [], size75: [] , size100: []},
       qualityThreshold = {
         5: 60,
         6: 60,
         7: 60,
-        8: 60
+        8: 60,
+        20: 60,
+        50: 60,
+        75: 60,
+        100: 60
       };
 
   // starts to create puzzles
@@ -60,25 +64,23 @@ var Levels = new (function(){
 
   function hasPuzzleAvailable(size) {
     var puzzleArr = puzzles['size' + size];
-    if (!puzzleArr || !puzzleArr.length) 
+    if (!puzzleArr || !puzzleArr.length)
       return false;
     return true;
   }
 
-  function getSize(size) {
+  function getSize(size, callback) {
     var puzzleArr = puzzles['size' + size];
     if (!puzzleArr || !puzzleArr.length) {
-      return create(size);
+      return create(size, callback);
     }
-
-    var puzzle = puzzleArr[0];
+    callback(puzzleArr[0]);
     // if we have enough puzzles, generate a new one for the next time the user plays
     if (puzzleArr.length > 1) {
       puzzleArr.shift();
       saveToStorage();
       BackgroundService.kick();
     }
-    return puzzle;
   }
 
   function needs() {
@@ -94,32 +96,14 @@ var Levels = new (function(){
     return false;
   }
 
-  function create(size) {
-    var grid = new Grid(size),
-        attempts = 0;
-
-    var puzzle = {
-      size: size,
-      full: [],
-      empty: [],
-      quality: 0,
-      ms: 0
+  function create(size, callback) {
+    var worker = new Worker('js/Board.js');
+    worker.onmessage = function(e) {
+      var puzzle = JSON.parse(e.data);
+      worker.terminate();
+      callback(puzzle)
     }
-
-    var d = new Date();
-    grid.clear();
-    grid.generate(size);
-    grid.maxify(size);
-    puzzle.full = grid.getValues();
-    grid.breakDown();      
-
-    puzzle.empty = grid.getValues();
-    puzzle.ms = new Date() - d;
-    puzzle.quality = grid.quality;
-
-    //console.log(puzzle.ms, puzzle)  
-
-    return puzzle;
+    worker.postMessage({'size':size});
   }
 
   this.hasPuzzleAvailable = hasPuzzleAvailable;

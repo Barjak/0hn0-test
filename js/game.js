@@ -20,7 +20,7 @@ var Game = new (function() {
 
       startedTutorial = false,
       grid,
-      sizes = [5,6,7,8],
+      sizes = [20,50,75,100],
       lastSize = 0,
       currentPuzzle = null,
       checkTOH = 0,
@@ -293,17 +293,14 @@ var Game = new (function() {
     $('#loading').show();
     setTimeout(function() { $('#loading').addClass('show'); },0);
   }
-  
+
   function loadGame(size) {
     onHomeScreen = false;
     $('#game').removeClass('show')
     showLoad();
     resize();
-    
-    setTimeout(function() {
-      var puzzle = Levels.getSize(size);
-      startGame(puzzle);
-    }, 100);
+
+    Levels.getSize(size, function(puzzle) { startGame(puzzle); });
   }
 
   // puzzle is object with format { size:6, full:[2,1,...], empty:[0,0,2,...], quality: 76, ms: 42 }
