@@ -1,3 +1,10 @@
+#### Testing emscripten
+
+Make sure `emcc` is in your path.
+
+`cd 0hn0-test/ && ./build.sh`
+
+
 0h n0
 =====
 
